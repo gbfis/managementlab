@@ -50,7 +50,7 @@ const Modal = {
     this._onClose = onClose || null;
     this._lastFocused = document.activeElement;
 
-    const overlay = Dom.createElement('div', { class: 'modal-overlay', role: 'presentation' });
+    const overlay = Dom.createElement('div', { class: 'modal-overlay' });
     overlay.addEventListener('mousedown', (e) => {
       if (e.target === overlay) this.close();
     });

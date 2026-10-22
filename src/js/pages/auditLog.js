@@ -85,9 +85,35 @@ const AuditLog = {
         { key: 'aksi', label: 'Aksi', render: (r) => Badge.render(r.aksi === 'account_locked' ? 'terkunci' : r.aksi) },
         {
           key: 'detail', label: 'Detail', render: (r) => {
-            const pre = Dom.createElement('pre', { style: 'white-space:pre-wrap;word-break:break-word;font-size:12px;margin:0;max-width:360px' });
-            pre.textContent = Format.prettyJson(r.detail);
-            return pre;
+            const MAX_LEN = 200;
+            let raw = Format.prettyJson(r.detail);
+            const isTruncated = raw.length > MAX_LEN;
+            const displayText = isTruncated ? raw.slice(0, MAX_LEN) + '…' : raw;
+
+            const wrap = Dom.createElement('div');
+            const pre = Dom.createElement('pre', {
+              style: 'white-space:pre-wrap;word-break:break-word;font-size:12px;margin:0;max-width:320px;max-height:80px;overflow:hidden'
+            });
+            pre.textContent = displayText;
+            wrap.appendChild(pre);
+
+            if (isTruncated) {
+              const toggle = Dom.createElement('button', {
+                class: 'btn-link',
+                type: 'button',
+                text: 'Lihat selengkapnya',
+                style: 'font-size:11px;margin-top:2px'
+              });
+              let expanded = false;
+              toggle.addEventListener('click', () => {
+                expanded = !expanded;
+                pre.textContent = expanded ? raw : displayText;
+                pre.style.maxHeight = expanded ? 'none' : '80px';
+                toggle.textContent = expanded ? 'Sembunyikan' : 'Lihat selengkapnya';
+              });
+              wrap.appendChild(toggle);
+            }
+            return wrap;
           }
         },
         { key: 'ip_address', label: 'IP', render: (r) => Dom.createElement('span', { text: r.ip_address || '-' }) }

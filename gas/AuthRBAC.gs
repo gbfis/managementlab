@@ -57,7 +57,7 @@ const PERMISSIONS = {
   'getReportPeminjaman':  ['admin', 'staff'],
   'getReportAlat':        ['admin', 'staff'],
   'getReportOverdue':     ['admin', 'staff'],
-  'getDashboardStats':    ['admin', 'staff', 'dosen', 'mahasiswa'],
+  'getDashboardStats':    ['admin', 'staff'],
   'getAuditLog':          ['admin'],
 };
 

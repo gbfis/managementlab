@@ -65,6 +65,10 @@ function createLaporanKerusakan(payload, currentUser) {
   validateEnum(tingkat_kerusakan, ['ringan', 'sedang', 'berat', 'hilang'], 'Tingkat kerusakan');
   validateLength(deskripsi, 5, 1000, 'Deskripsi');
 
+  if (foto_url && !validateUrl(foto_url)) {
+    throw { code: 'VALIDATION_ERROR', message: 'URL foto tidak valid (harus diawali http:// atau https://)' };
+  }
+
   // Ambil nama item
   let namaItem = '';
   if (tipe_item === 'lab') {
@@ -232,6 +236,9 @@ function updateTindakLanjut(id, payload, currentUser) {
     updates.estimasi_biaya = parseInt(payload.estimasi_biaya, 10) || 0;
   }
   if (payload.foto_url !== undefined) {
+    if (payload.foto_url && !validateUrl(payload.foto_url)) {
+      throw { code: 'VALIDATION_ERROR', message: 'URL foto tidak valid (harus diawali http:// atau https://)' };
+    }
     updates.foto_url = sanitizeForSheet(String(payload.foto_url).trim());
   }
 

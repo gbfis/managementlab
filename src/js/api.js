@@ -1,10 +1,18 @@
 /**
  * api.js — klien HTTP ke Google Apps Script Web App.
- * Token dikirim: GET via query param ?token=, POST via body.token
- * (GAS Web App tidak bisa membaca header Authorization, jadi token disertakan di body).
  *
- * GAS_API_URL dibaca dari <meta name="gas-api-url"> (lihat index.html)
- * atau window.__GAS_API_URL__ (jika diinjeksi environment).
+ * CATATAN KEAMANAN TOKEN:
+ * GAS Web App tidak bisa membaca request header (limitasi platform), sehingga:
+ *   - GET  : token dikirim via query param (?token=...) — muncul di URL, browser history, dan server log GAS
+ *   - POST : token dikirim via request body (JSON) — lebih aman
+ *
+ * Mitigasi yang sudah diterapkan:
+ *   1. TTL token pendek (24 jam di GAS Auth.gs)
+ *   2. Token di-invalidate saat logout dan saat password direset/diganti
+ *   3. GAS hanya dapat diakses via HTTPS
+ *   4. Tidak ada link eksternal di UI yang bisa membocorkan token via Referer header
+ *
+ * GAS_API_URL dibaca dari <meta name="gas-api-url"> di index.html.
  */
 const Api = {
   baseUrl: null,

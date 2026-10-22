@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Secrets (JANGAN commit)
+.env
+.env.local
+secrets.json
+
+# GAS push credentials
+.clasp.json
+
+# Agent tasks
+.agents/

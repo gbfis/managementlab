@@ -225,12 +225,19 @@ function approvePeminjaman(id, catatan, currentUser) {
     decrementStok(peminjaman.id_item, jumlahDiminta);
   }
 
-  // Jika tipe lab: set status lab → 'dipinjam'
+  // Jika tipe lab: cek ulang status sebelum set ke 'dipinjam' (guard race condition)
   if (peminjaman.tipe_peminjaman === 'lab') {
     const labResult = findRowById('lab', peminjaman.id_item);
-    if (labResult) {
-      updateRow('lab', labResult.rowIndex, { status: 'dipinjam', updated_at: new Date().toISOString() });
+    if (!labResult) {
+      throw { code: 'NOT_FOUND', message: 'Lab tidak ditemukan' };
     }
+    if (labResult.data.status !== 'tersedia') {
+      throw {
+        code: 'CONFLICT',
+        message: `Lab tidak tersedia untuk disetujui (status saat ini: ${labResult.data.status})`
+      };
+    }
+    updateRow('lab', labResult.rowIndex, { status: 'dipinjam', updated_at: new Date().toISOString() });
   }
 
   const now = new Date().toISOString();

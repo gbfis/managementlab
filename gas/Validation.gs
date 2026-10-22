@@ -129,3 +129,15 @@ function validateNoWa(value) {
   if (typeof value !== 'string') return false;
   return /^(\+62|62|0)[0-9]{8,13}$/.test(value.trim());
 }
+
+/**
+ * Validasi format URL dasar — minimal harus diawali http:// atau https://
+ * @param {string} value
+ * @returns {boolean}
+ */
+function validateUrl(value) {
+  if (typeof value !== 'string') return false;
+  var trimmed = value.trim();
+  if (trimmed === '') return true; // kosong boleh (opsional)
+  return /^https?:\/\/[^\s]+$/.test(trimmed);
+}

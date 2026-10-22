@@ -27,7 +27,7 @@ const Badge = {
     diabaikan: { label: 'Diabaikan', cls: 'badge-neutral' },
     // Tipe laporan
     kerusakan: { label: 'Kerusakan', cls: 'badge-danger' },
-    kehilangan: { label: 'Kehilangan', cls: 'badge-overdue' },
+    kehilangan: { label: 'Kehilangan', cls: 'badge-danger' },
     // Sumber laporan
     pengembalian: { label: 'Pengembalian', cls: 'badge-neutral' },
     mandiri: { label: 'Mandiri', cls: 'badge-info' },

@@ -142,6 +142,7 @@ function updateUser(payload, currentUser) {
 
 /**
  * Reset password user: generate salt baru, hash password baru.
+ * Semua token aktif milik user di-invalidate setelah reset.
  * @param {string} id
  * @param {string} newPassword
  * @param {object} currentUser
@@ -164,6 +165,9 @@ function resetPassword(id, newPassword, currentUser) {
     password_hash: passwordHash,
     updated_at: new Date().toISOString()
   });
+
+  // Invalidasi semua token aktif milik user yang password-nya di-reset
+  _invalidateUserTokens(id);
 
   logAudit(currentUser.email, 'update_user', { id, action: 'reset_password' });
 }
@@ -260,6 +264,9 @@ function changePassword(passwordLama, passwordBaru, currentUser) {
     password_hash: passwordHash,
     updated_at: new Date().toISOString()
   });
+
+  // Invalidasi semua token aktif setelah ganti password
+  _invalidateUserTokens(currentUser.id);
 
   logAudit(currentUser.email, 'update_user', { id: currentUser.id, action: 'change_password' });
 }

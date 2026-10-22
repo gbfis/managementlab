@@ -87,8 +87,8 @@ const PeminjamanForm = {
     const keperluan = Dom.createElement('textarea', { id: 'keperluan', name: 'keperluan', class: 'form-textarea', maxlength: '500' });
     form.appendChild(Form.fieldGroup('Keperluan', keperluan, { required: true, hint: 'Min. 10 karakter, maks. 500 karakter' }));
 
-    // Field mahasiswa
-    if (user && user.role === 'mahasiswa') {
+    // Field akademik untuk mahasiswa dan dosen
+    if (user && (user.role === 'mahasiswa' || user.role === 'dosen')) {
       const mk = Dom.createElement('input', { type: 'text', id: 'mata_kuliah', name: 'mata_kuliah', class: 'form-input', maxlength: '100' });
       form.appendChild(Form.fieldGroup('Mata Kuliah', mk, { hint: 'Opsional, maks. 100 karakter' }));
       const dosen = Dom.createElement('input', { type: 'text', id: 'dosen_pembimbing', name: 'dosen_pembimbing', class: 'form-input', maxlength: '100' });

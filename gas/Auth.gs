@@ -160,3 +160,20 @@ function _sanitizeUser(user) {
   const { password_hash, salt, ...safeUser } = user;
   return safeUser;
 }
+
+/**
+ * Invalidasi semua token aktif milik seorang user.
+ * Iterasi PropertiesService, hapus entry yang value-nya berawalan `userId|`.
+ * Dipanggil saat password direset/diganti untuk keamanan.
+ * @param {string} userId
+ */
+function _invalidateUserTokens(userId) {
+  var props = PropertiesService.getScriptProperties();
+  var keys = props.getProperties();
+  var prefix = userId + '|';
+  for (var key in keys) {
+    if (keys.hasOwnProperty(key) && String(keys[key]).indexOf(prefix) === 0) {
+      props.deleteProperty(key);
+    }
+  }
+}
