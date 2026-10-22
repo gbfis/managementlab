@@ -131,6 +131,9 @@ function verifySheets() {
  * Setup script properties (secrets). Ganti nilai placeholder sebelum menjalankan.
  * Jalankan sekali, lalu hapus atau komentari nilai sensitif.
  * JANGAN commit nilai asli ke git.
+ *
+ * Alternatif lebih aman: isi langsung di GAS editor
+ * Project Settings → Script Properties → Add property
  */
 function setupSecrets() {
   const props = PropertiesService.getScriptProperties();
