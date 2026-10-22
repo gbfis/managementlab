@@ -24,9 +24,12 @@ const Alat = {
     container.appendChild(loading);
 
     try {
-      const tasks = [Api.get('getAlat')];
-      if (Auth.isAdminOrStaff()) tasks.push(Api.get('getLabs'));
-      const [alat, labs] = await Promise.all(tasks);
+      // Fetch alat dan labs secara paralel, tapi independent
+      // Jika getAlat gagal, tetap tampilkan form dengan data labs
+      const alatPromise = Api.get('getAlat').catch(e => { console.error('getAlat error:', e.message); return []; });
+      const labsPromise = Auth.isAdminOrStaff() ? Api.get('getLabs').catch(e => { console.error('getLabs error:', e.message); return []; }) : Promise.resolve([]);
+
+      const [alat, labs] = await Promise.all([alatPromise, labsPromise]);
       this._data = alat || [];
       this._labs = labs || [];
       loading.remove();
