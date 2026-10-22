@@ -157,3 +157,58 @@ function runFullSetup() {
   }
   Logger.log('=== Setup selesai ===');
 }
+
+/**
+ * Buat user admin pertama langsung di sheet users.
+ * GANTI nilai nama, email, nip, no_wa, dan password sesuai kebutuhan.
+ * Jalankan SEKALI saja — cek dulu sheet users kosong sebelum jalankan.
+ */
+function createAdminUser() {
+  // ====== GANTI DATA DI BAWAH INI ======
+  var ADMIN_NAMA     = 'Administrator';
+  var ADMIN_EMAIL    = 'admin@lab.ac.id';
+  var ADMIN_NIP      = '198001012010011001';
+  var ADMIN_NO_WA    = '081234567890';
+  var ADMIN_PASSWORD = 'Admin1234!';
+  // =====================================
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName('users');
+  if (!sheet) {
+    Logger.log('ERROR: Sheet users tidak ditemukan. Jalankan runFullSetup() dulu.');
+    return;
+  }
+
+  // Cek apakah email sudah ada
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (data[i][2] === ADMIN_EMAIL) {
+      Logger.log('User dengan email ' + ADMIN_EMAIL + ' sudah ada di baris ' + (i + 1));
+      return;
+    }
+  }
+
+  var salt = generateSalt();
+  var hash = hashPassword(ADMIN_PASSWORD, salt);
+  var now  = new Date().toISOString();
+
+  sheet.appendRow([
+    'admin-001',       // id
+    ADMIN_NAMA,        // nama
+    ADMIN_EMAIL,       // email
+    ADMIN_NIP,         // nip_nim
+    'admin',           // role
+    ADMIN_NO_WA,       // no_wa
+    '',                // telegram_chat_id
+    hash,              // password_hash
+    salt,              // salt
+    0,                 // login_attempt
+    'aktif',           // status
+    now                // created_at
+  ]);
+
+  Logger.log('✅ Admin berhasil dibuat!');
+  Logger.log('Email    : ' + ADMIN_EMAIL);
+  Logger.log('Password : ' + ADMIN_PASSWORD);
+  Logger.log('Silakan login di managementlab.pages.dev');
+}
