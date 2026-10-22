@@ -686,3 +686,67 @@
 .mb-6 { margin-bottom: var(--spacing-6); }
 .text-muted { color: var(--color-text-muted); }
 .text-danger { color: var(--color-danger); }
+
+/* ============================================================
+   Sync Indicator — pojok kanan atas, status sinkronisasi data
+   ============================================================ */
+.sync-indicator {
+  position: fixed;
+  top: var(--spacing-3);
+  right: var(--spacing-4);
+  z-index: 190;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 9999px;
+  padding: 5px var(--spacing-3);
+  box-shadow: var(--shadow);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  animation: toast-fade 150ms ease-out;
+  transition: opacity 200ms ease;
+}
+
+/* Saat menyimpan — border biru */
+.sync-saving {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* Setelah berhasil — border hijau */
+.sync-saved {
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+
+/* Gagal — border merah */
+.sync-error {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.sync-text {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.sync-icon {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* Spinner kecil khusus untuk sync */
+.sync-spinner {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  border: 2px solid rgba(26, 54, 93, 0.2);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  flex-shrink: 0;
+}

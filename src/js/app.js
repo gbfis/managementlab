@@ -20,6 +20,7 @@ const App = {
 
   init() {
     Api.init();
+    if (typeof Sync !== 'undefined') Sync.init();
     this.registerRoutes();
     Router.init();
   },

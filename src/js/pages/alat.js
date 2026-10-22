@@ -107,7 +107,7 @@ const Alat = {
         Form.fieldGroup('Deskripsi', fields.deskripsi)
       ]);
     }, [
-      { label: 'Batal', type: 'secondary', onClick: () => {} },
+        { label: 'Batal', type: 'secondary', onClick: () => {} },
       {
         label: 'Simpan', type: 'primary', closeOnClick: true, onClick: async () => {
           if (!Validate.required(fields.nama.value)) { Toast.error('Nama alat wajib diisi'); return false; }
@@ -124,16 +124,36 @@ const Alat = {
             stok: Number(fields.stok.value || 0),
             deskripsi: fields.deskripsi.value.trim()
           };
+
+          // Optimistic update — langsung tambah ke tabel lokal
+          const selectedLab = this._labs.find(l => l.id === fields.idLab.value);
+          const optimisticItem = Object.assign({ id: '_tmp_' + Date.now(), status: 'tersedia' }, payload, {
+            nama_lab: selectedLab ? selectedLab.nama_lab : ''
+          });
+
+          if (!isEdit) {
+            this._data.push(optimisticItem);
+            this._renderTable(document.getElementById('main-content'));
+          }
+
           try {
             if (isEdit) {
               await Api.post('updateAlat', Object.assign({ id: alat.id }, payload));
               Toast.success('Alat berhasil diperbarui');
             } else {
-              await Api.post('createAlat', payload);
+              const result = await Api.post('createAlat', payload);
+              // Ganti optimistic item dengan data asli dari server
+              const idx = this._data.findIndex(d => d.id === optimisticItem.id);
+              if (idx !== -1 && result) this._data[idx] = result;
               Toast.success('Alat berhasil ditambahkan');
             }
-            this._reload();
-          } catch (e) { Toast.error(e.message || 'Gagal menyimpan alat'); return false; }
+            this._renderTable(document.getElementById('main-content'));
+          } catch (e) {
+            // Rollback optimistic update
+            if (!isEdit) this._data = this._data.filter(d => d.id !== optimisticItem.id);
+            this._renderTable(document.getElementById('main-content'));
+            Toast.error(e.message || 'Gagal menyimpan alat'); return false;
+          }
         }
       }
     ]);
