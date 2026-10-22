@@ -5,6 +5,21 @@
  */
 
 /**
+ * Escape karakter HTML agar aman digunakan di parse_mode HTML Telegram.
+ * Wajib dipanggil untuk SETIAP field user-controlled sebelum diinterpolasi ke template.
+ * @param {*} value
+ * @returns {string}
+ */
+function escapeTelegramHtml(value) {
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/**
  * Kirim pesan teks ke TELEGRAM_CHANNEL_ID.
  * @param {string} text - HTML-formatted text
  * @param {Array|null} inlineKeyboard - [[{text, url}, ...], ...] atau null
@@ -95,17 +110,20 @@ function buildContactButtons(namaPeminjam, noWa, email) {
  * @param {object} peminjaman
  */
 function sendTelegramPeminjamanBaru(peminjaman) {
+  const nama = escapeTelegramHtml(peminjaman.nama_peminjam);
+  const item = escapeTelegramHtml(peminjaman.nama_item);
+  const keperluan = escapeTelegramHtml(peminjaman.keperluan);
   const jumlahInfo = peminjaman.tipe_peminjaman === 'alat' && peminjaman.jumlah > 1
-    ? `\n📦 Jumlah: ${peminjaman.jumlah} unit`
+    ? `\n📦 Jumlah: ${escapeTelegramHtml(peminjaman.jumlah)} unit`
     : '';
 
   const text = `📋 <b>PEMINJAMAN BARU</b>
 ━━━━━━━━━━━━━━━━━━━━━━━
-👤 Peminjam: <b>${peminjaman.nama_peminjam}</b>
-🏷️ Item: ${peminjaman.nama_item}${jumlahInfo}
-📅 Pinjam: ${peminjaman.tanggal_pinjam}
-📅 Kembali: ${peminjaman.tanggal_kembali_rencana}
-📝 Keperluan: ${peminjaman.keperluan}
+👤 Peminjam: <b>${nama}</b>
+🏷️ Item: ${item}${jumlahInfo}
+📅 Pinjam: ${escapeTelegramHtml(peminjaman.tanggal_pinjam)}
+📅 Kembali: ${escapeTelegramHtml(peminjaman.tanggal_kembali_rencana)}
+📝 Keperluan: ${keperluan}
 ━━━━━━━━━━━━━━━━━━━━━━━
 Status: <b>Menunggu Persetujuan</b>`;
 
@@ -119,9 +137,9 @@ Status: <b>Menunggu Persetujuan</b>`;
 function sendTelegramApproved(peminjaman) {
   const text = `✅ <b>PEMINJAMAN DISETUJUI</b>
 ━━━━━━━━━━━━━━━━━━━━━━━
-👤 Peminjam: <b>${peminjaman.nama_peminjam}</b>
-🏷️ Item: ${peminjaman.nama_item}
-📅 Kembali: ${peminjaman.tanggal_kembali_rencana}
+👤 Peminjam: <b>${escapeTelegramHtml(peminjaman.nama_peminjam)}</b>
+🏷️ Item: ${escapeTelegramHtml(peminjaman.nama_item)}
+📅 Kembali: ${escapeTelegramHtml(peminjaman.tanggal_kembali_rencana)}
 ━━━━━━━━━━━━━━━━━━━━━━━
 Status: <b>Approved</b>`;
 
@@ -136,9 +154,9 @@ Status: <b>Approved</b>`;
 function sendTelegramReminderHariIni(peminjaman) {
   const text = `⏰ <b>HARUS KEMBALI HARI INI</b>
 ━━━━━━━━━━━━━━━━━━━━━━━
-👤 Peminjam: <b>${peminjaman.nama_peminjam}</b>
-🏷️ Item: ${peminjaman.nama_item}
-📅 Batas Kembali: ${peminjaman.tanggal_kembali_rencana}
+👤 Peminjam: <b>${escapeTelegramHtml(peminjaman.nama_peminjam)}</b>
+🏷️ Item: ${escapeTelegramHtml(peminjaman.nama_item)}
+📅 Batas Kembali: ${escapeTelegramHtml(peminjaman.tanggal_kembali_rencana)}
 ━━━━━━━━━━━━━━━━━━━━━━━
 Hubungi peminjam untuk konfirmasi pengembalian.`;
 
@@ -157,12 +175,12 @@ Hubungi peminjam untuk konfirmasi pengembalian.`;
  * @param {number} hariTerlambat
  */
 function sendTelegramOverdue(peminjaman, hariTerlambat) {
-  const text = `🚨 <b>OVERDUE — TERLAMBAT ${hariTerlambat} HARI</b>
+  const text = `🚨 <b>OVERDUE — TERLAMBAT ${parseInt(hariTerlambat, 10)} HARI</b>
 ━━━━━━━━━━━━━━━━━━━━━━━
-👤 Peminjam: <b>${peminjaman.nama_peminjam}</b>
-🏷️ Item: ${peminjaman.nama_item}
-📅 Batas Kembali: ${peminjaman.tanggal_kembali_rencana}
-⚠️ Terlambat: <b>${hariTerlambat} hari</b>
+👤 Peminjam: <b>${escapeTelegramHtml(peminjaman.nama_peminjam)}</b>
+🏷️ Item: ${escapeTelegramHtml(peminjaman.nama_item)}
+📅 Batas Kembali: ${escapeTelegramHtml(peminjaman.tanggal_kembali_rencana)}
+⚠️ Terlambat: <b>${parseInt(hariTerlambat, 10)} hari</b>
 ━━━━━━━━━━━━━━━━━━━━━━━
 <b>SEGERA hubungi peminjam!</b>`;
 
@@ -181,13 +199,14 @@ function sendTelegramOverdue(peminjaman, hariTerlambat) {
  * @param {object} peminjaman
  */
 function sendTelegramLaporanKerusakan(laporan, peminjaman) {
+  const pemLine1 = peminjaman ? `\n👤 Peminjam: ${escapeTelegramHtml(peminjaman.nama_peminjam)}` : '';
+  const pemLine2 = peminjaman ? `\n📋 Dari peminjaman: ${escapeTelegramHtml(peminjaman.id)}` : '';
+
   const text = `🔧 <b>KERUSAKAN DILAPORKAN</b>
 ━━━━━━━━━━━━━━━━━━━━━━━
-📦 Item: ${laporan.nama_item}
-⚠️ Tingkat: ${laporan.tingkat_kerusakan}
-📝 Keterangan: ${laporan.deskripsi}
-${peminjaman ? `👤 Peminjam: ${peminjaman.nama_peminjam}` : ''}
-${peminjaman ? `📋 Dari peminjaman: ${peminjaman.id}` : ''}
+📦 Item: ${escapeTelegramHtml(laporan.nama_item)}
+⚠️ Tingkat: ${escapeTelegramHtml(laporan.tingkat_kerusakan)}
+📝 Keterangan: ${escapeTelegramHtml(laporan.deskripsi)}${pemLine1}${pemLine2}
 ━━━━━━━━━━━━━━━━━━━━━━━
 Status: <b>Menunggu Tindak Lanjut</b>`;
 
@@ -201,11 +220,12 @@ Status: <b>Menunggu Tindak Lanjut</b>`;
  * @param {object} peminjaman
  */
 function sendTelegramLaporanKehilangan(laporan, peminjaman) {
+  const pemLine = peminjaman ? `\n📋 Dari peminjaman: ${escapeTelegramHtml(peminjaman.id)}` : '';
+
   const text = `🚨 <b>KEHILANGAN DILAPORKAN</b>
 ━━━━━━━━━━━━━━━━━━━━━━━
-📦 Item: ${laporan.nama_item}
-⚠️ Tingkat: Hilang
-${peminjaman ? `📋 Dari peminjaman: ${peminjaman.id}` : ''}
+📦 Item: ${escapeTelegramHtml(laporan.nama_item)}
+⚠️ Tingkat: Hilang${pemLine}
 ━━━━━━━━━━━━━━━━━━━━━━━
 Status: <b>Menunggu Tindak Lanjut</b>`;
 
@@ -226,10 +246,10 @@ function sendTelegramLaporanMandiri(laporan) {
 
   const text = `📋 <b>LAPORAN MANDIRI</b>
 ━━━━━━━━━━━━━━━━━━━━━━━
-📦 Item: ${laporan.nama_item}
-⚠️ Tipe: ${tipeLabel} — ${tingkatLabel}
-📝 Keterangan: ${laporan.deskripsi}
-👤 Dilaporkan oleh: ${laporan.nama_pelapor} (${laporan.email_pelapor || '-'})
+📦 Item: ${escapeTelegramHtml(laporan.nama_item)}
+⚠️ Tipe: ${escapeTelegramHtml(tipeLabel)} — ${escapeTelegramHtml(tingkatLabel)}
+📝 Keterangan: ${escapeTelegramHtml(laporan.deskripsi)}
+👤 Dilaporkan oleh: ${escapeTelegramHtml(laporan.nama_pelapor)} (${escapeTelegramHtml(laporan.email_pelapor || '-')})
 ━━━━━━━━━━━━━━━━━━━━━━━
 Status: <b>Menunggu Tindak Lanjut</b>`;
 

@@ -38,9 +38,13 @@ function getReportPeminjaman(from, to, tipe, status) {
     byTipe[row.tipe_peminjaman] = (byTipe[row.tipe_peminjaman] || 0) + 1;
   });
 
-  // Total denda
-  const totalDenda = filtered.reduce((sum, row) => {
-    // Ambil denda dari sheet pengembalian (best effort)
+  // Total denda: baca dari sheet pengembalian untuk peminjaman yang ada di filtered
+  const filteredIds = new Set(filtered.map(row => row.id));
+  const pengembalianRows = getAllRows('pengembalian');
+  const totalDenda = pengembalianRows.reduce((sum, row) => {
+    if (filteredIds.has(row.id_peminjaman)) {
+      return sum + (parseInt(row.denda, 10) || 0);
+    }
     return sum;
   }, 0);
 
@@ -49,6 +53,7 @@ function getReportPeminjaman(from, to, tipe, status) {
     total: filtered.length,
     by_status: byStatus,
     by_tipe: byTipe,
+    total_denda: totalDenda,
     data: filtered
   };
 }

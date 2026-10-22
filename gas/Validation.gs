@@ -91,14 +91,15 @@ function validateDate(dateStr, fieldName) {
 
 /**
  * Validasi bilangan bulat positif, tidak melebihi max (opsional).
+ * Menggunakan Number() agar leading/trailing whitespace dan nilai non-integer ditolak.
  * @param {*} value
  * @param {number|null} max
  * @param {string} fieldName
  * @throws {{code: string, message: string}}
  */
 function validatePositiveInt(value, max, fieldName) {
-  const n = parseInt(value, 10);
-  if (isNaN(n) || n < 1 || String(n) !== String(value) && n !== Number(value)) {
+  const n = Number(value);
+  if (!Number.isInteger(n) || n < 1) {
     throw { code: 'VALIDATION_ERROR', message: `${fieldName} harus bilangan bulat positif` };
   }
   if (max !== null && max !== undefined && n > max) {

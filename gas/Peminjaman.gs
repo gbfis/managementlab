@@ -208,9 +208,29 @@ function approvePeminjaman(id, catatan, currentUser) {
     };
   }
 
-  // Jika tipe alat: cek dan kurangi stok
+  // Jika tipe alat: cek ulang stok (guard race condition) lalu kurangi
   if (peminjaman.tipe_peminjaman === 'alat') {
-    decrementStok(peminjaman.id_item, parseInt(peminjaman.jumlah, 10));
+    const alatCheck = findRowById('alat', peminjaman.id_item);
+    if (!alatCheck) {
+      throw { code: 'NOT_FOUND', message: 'Alat tidak ditemukan' };
+    }
+    const stokTersedia = parseInt(alatCheck.data.stok, 10);
+    const jumlahDiminta = parseInt(peminjaman.jumlah, 10);
+    if (stokTersedia < jumlahDiminta) {
+      throw {
+        code: 'CONFLICT',
+        message: `Stok tidak mencukupi untuk approve. Tersedia: ${stokTersedia}, dibutuhkan: ${jumlahDiminta}`
+      };
+    }
+    decrementStok(peminjaman.id_item, jumlahDiminta);
+  }
+
+  // Jika tipe lab: set status lab → 'dipinjam'
+  if (peminjaman.tipe_peminjaman === 'lab') {
+    const labResult = findRowById('lab', peminjaman.id_item);
+    if (labResult) {
+      updateRow('lab', labResult.rowIndex, { status: 'dipinjam', updated_at: new Date().toISOString() });
+    }
   }
 
   const now = new Date().toISOString();
@@ -322,7 +342,7 @@ function returnPeminjaman(id, kondisi, catatan, denda, currentUser) {
     created_at: now
   });
 
-  // 3. Manajemen stok dan kondisi alat
+  // 3. Manajemen stok dan kondisi item
   if (peminjaman.tipe_peminjaman === 'alat') {
     const jumlah = parseInt(peminjaman.jumlah, 10);
 
@@ -361,13 +381,25 @@ function returnPeminjaman(id, kondisi, catatan, denda, currentUser) {
         }
       }
     }
+  }
 
-    // 4. Auto-create laporan kerusakan/kehilangan
-    if (kondisi === 'rusak_ringan' || kondisi === 'rusak_berat') {
-      createLaporanKerusakanOtomatis(peminjaman, kondisi, currentUser);
-    } else if (kondisi === 'hilang') {
-      createLaporanKehilanganOtomatis(peminjaman, currentUser);
+  // Jika tipe lab: reset status lab → 'tersedia'
+  if (peminjaman.tipe_peminjaman === 'lab') {
+    const labResult = findRowById('lab', peminjaman.id_item);
+    if (labResult) {
+      // Hanya reset ke tersedia jika kondisi baik; jika rusak/hilang biarkan admin update manual
+      if (kondisi === 'baik') {
+        updateRow('lab', labResult.rowIndex, { status: 'tersedia', updated_at: now });
+      }
+      // Jika kondisi rusak: biarkan status lab diupdate via laporan tindak lanjut
     }
+  }
+
+  // 4. Auto-create laporan kerusakan/kehilangan — berlaku untuk SEMUA tipe (lab dan alat)
+  if (kondisi === 'rusak_ringan' || kondisi === 'rusak_berat') {
+    createLaporanKerusakanOtomatis(peminjaman, kondisi, currentUser);
+  } else if (kondisi === 'hilang') {
+    createLaporanKehilanganOtomatis(peminjaman, currentUser);
   }
 
   // 5. Log audit
