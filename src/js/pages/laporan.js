@@ -147,8 +147,16 @@ const Laporan = {
     const ctx = canvas.getContext('2d');
     const w = canvas.width, h = canvas.height;
     ctx.clearRect(0, 0, w, h);
+
+    // Leggi token warna dari CSS agar grafik selaras design system (m-3)
+    const cssVars = getComputedStyle(document.documentElement);
+    const colorPrimary  = cssVars.getPropertyValue('--color-primary').trim()  || '#1a365d';
+    const colorText     = cssVars.getPropertyValue('--color-text').trim()      || '#1a202c';
+    const colorMuted    = cssVars.getPropertyValue('--color-text-muted').trim()|| '#718096';
+    const colorBorder   = cssVars.getPropertyValue('--color-border').trim()    || '#e2e8f0';
+
     if (!bars.length) {
-      ctx.fillStyle = '#718096';
+      ctx.fillStyle = colorMuted;
       ctx.font = '14px sans-serif';
       ctx.fillText('Tidak ada data', w / 2 - 40, h / 2);
       return;
@@ -160,27 +168,27 @@ const Laporan = {
     const barW = Math.max(10, chartW / bars.length - 8);
 
     // Axis
-    ctx.strokeStyle = '#e2e8f0';
+    ctx.strokeStyle = colorBorder;
     ctx.beginPath();
     ctx.moveTo(padding, padding);
     ctx.lineTo(padding, h - padding);
     ctx.lineTo(w - padding, h - padding);
     ctx.stroke();
 
-    ctx.fillStyle = '#1a365d';
+    ctx.fillStyle = colorPrimary;
     bars.forEach((b, i) => {
       const x = padding + i * (chartW / bars.length) + 4;
       const bh = (b.value / max) * chartH;
       const y = h - padding - bh;
       ctx.fillRect(x, y, barW, bh);
       // value label
-      ctx.fillStyle = '#1a202c';
+      ctx.fillStyle = colorText;
       ctx.font = '12px sans-serif';
       ctx.fillText(String(b.value), x + barW / 2 - 6, y - 6);
       // x label
-      ctx.fillStyle = '#718096';
+      ctx.fillStyle = colorMuted;
       ctx.fillText(b.label, x + barW / 2 - 14, h - padding + 16);
-      ctx.fillStyle = '#1a365d';
+      ctx.fillStyle = colorPrimary;
     });
   }
 };

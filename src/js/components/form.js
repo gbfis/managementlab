@@ -3,6 +3,8 @@
  * Aman dari XSS (textContent).
  */
 const Form = {
+  _seq: 0,
+
   /**
    * Ambil object dari semua input/select/textarea dalam form (berdasarkan name).
    * @param {HTMLFormElement} formEl
@@ -98,7 +100,13 @@ const Form = {
   fieldGroup(labelText, inputEl, opts) {
     opts = opts || {};
     const group = Dom.createElement('div', { class: 'form-group' });
-    if (labelText) group.appendChild(this.createLabel(labelText, inputEl.id, opts.required));
+    if (labelText) {
+      // Pastikan label terhubung ke kontrol via for/id (aksesibilitas WCAG).
+      // Bila input tanpa id, beri id unik otomatis agar <label for> valid
+      // (bukan <label for=""> yang tidak terhubung ke apa pun).
+      if (!inputEl.id) inputEl.id = 'fld-' + (++this._seq);
+      group.appendChild(this.createLabel(labelText, inputEl.id, opts.required));
+    }
     group.appendChild(inputEl);
     if (opts.hint) group.appendChild(Dom.createElement('span', { class: 'form-hint', text: opts.hint }));
     return group;

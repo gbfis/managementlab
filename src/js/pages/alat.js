@@ -107,11 +107,11 @@ const Alat = {
       { label: 'Batal', type: 'secondary', onClick: () => {} },
       {
         label: 'Simpan', type: 'primary', closeOnClick: true, onClick: async () => {
-          if (!Validate.required(fields.nama.value)) { Toast.error('Nama alat wajib diisi'); return; }
-          if (!Validate.required(fields.kode.value)) { Toast.error('Kode alat wajib diisi'); return; }
-          if (!Validate.required(fields.idLab.value)) { Toast.error('Lab wajib dipilih'); return; }
-          if (!Validate.required(fields.kategori.value)) { Toast.error('Kategori wajib diisi'); return; }
-          if (!Validate.positiveInt(fields.stok.value, null) && fields.stok.value !== '0') { Toast.error('Stok harus angka (min 0)'); return; }
+          if (!Validate.required(fields.nama.value)) { Toast.error('Nama alat wajib diisi'); return false; }
+          if (!Validate.required(fields.kode.value)) { Toast.error('Kode alat wajib diisi'); return false; }
+          if (!Validate.required(fields.idLab.value)) { Toast.error('Lab wajib dipilih'); return false; }
+          if (!Validate.required(fields.kategori.value)) { Toast.error('Kategori wajib diisi'); return false; }
+          if (!Validate.positiveInt(fields.stok.value, null) && fields.stok.value !== '0') { Toast.error('Stok harus angka (min 0)'); return false; }
           const payload = {
             nama_alat: fields.nama.value.trim(),
             kode_alat: fields.kode.value.trim(),
@@ -130,7 +130,7 @@ const Alat = {
               Toast.success('Alat berhasil ditambahkan');
             }
             this._reload();
-          } catch (e) { Toast.error(e.message || 'Gagal menyimpan alat'); }
+          } catch (e) { Toast.error(e.message || 'Gagal menyimpan alat'); return false; }
         }
       }
     ]);
@@ -153,7 +153,7 @@ const Alat = {
             await Api.post('updateAlat', { id: alat.id, status: select.value });
             Toast.success('Status alat diubah');
             this._reload();
-          } catch (e) { Toast.error(e.message || 'Gagal mengubah status'); }
+          } catch (e) { Toast.error(e.message || 'Gagal mengubah status'); return false; }
         }
       }
     ]);

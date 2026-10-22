@@ -1,11 +1,42 @@
 /**
  * modal.js — dialog modal dengan focus trap, ESC, aria-modal.
  * Konten dirender dari fungsi (DOM element), bukan string HTML.
+ *
+ * Catatan: Modal adalah singleton (satu _overlay). Membuka modal kedua
+ * saat yang pertama terbuka akan menutup yang pertama. State modal lama
+ * (_lastFocused/_onClose) hilang. Asumsi ini sengaja — saat ini tidak ada
+ * alur modal bertingkat; bila nanti perlu, antrekan atau refaktor ke stack.
  */
 const Modal = {
   _overlay: null,
   _lastFocused: null,
   _onClose: null,
+  _keyHandler: null,
+
+  /**
+   * Handler klik tombol modal.
+   * Modal hanya ditutup bila onClick selesai tanpa melempar dan tidak
+   * mengembalikan false (sinyal "pertahankan terbuka"). Path error
+   * (validasi gagal / API gagal) TIDAK boleh menutup modal agar input
+   * yang sudah diketik tidak hilang.
+   */
+  async _handleBtnClick(btn) {
+    if (typeof btn.onClick !== 'function') {
+      if (btn.closeOnClick !== false) this.close();
+      return;
+    }
+    let result;
+    try {
+      result = await Promise.resolve(btn.onClick());
+    } catch (err) {
+      // onClick melempar — biarkan modal tetap terbuka.
+      // Penampilan error adalah tanggung jawab onClick (mis. Toast.error).
+      return;
+    }
+    if (btn.closeOnClick === false) return;
+    if (result === false) return; // onClick sinyal: jangan tutup
+    this.close();
+  },
 
   /**
    * Buka modal.
@@ -71,10 +102,7 @@ const Modal = {
           class: cls,
           type: 'button',
           text: btn.label || '',
-          onClick: () => {
-            if (typeof btn.onClick === 'function') btn.onClick();
-            if (btn.closeOnClick !== false) this.close();
-          }
+          onClick: () => this._handleBtnClick(btn)
         });
         footer.appendChild(b);
       });

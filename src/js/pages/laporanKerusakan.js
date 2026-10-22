@@ -88,7 +88,7 @@ const LaporanKerusakan = {
       ];
       Table.render(container, columns, data, {
         pageSize: 10,
-        emptyMessage: this._filter === 'aktif' ? 'Tidak ada laporan aktif.' : 'Tidak ada laporan yang selesai.'
+        emptyMessage: this._filter === 'aktif' ? 'Tidak ada laporan aktif. Gunakan "Laporan Mandiri" untuk mencatat kerusakan atau kehilangan.' : 'Tidak ada laporan yang selesai.'
       });
     } catch (e) {
       Dom.clearChildren(container);
@@ -145,8 +145,8 @@ const LaporanKerusakan = {
       { label: 'Batal', type: 'secondary', onClick: () => {} },
       {
         label: 'Kirim', type: 'primary', closeOnClick: true, onClick: async () => {
-          if (!Validate.required(fields.item.value)) { Toast.error('Pilih item'); return; }
-          if (!Validate.minLength(fields.deskripsi.value, 5)) { Toast.error('Deskripsi minimal 5 karakter'); return; }
+          if (!Validate.required(fields.item.value)) { Toast.error('Pilih item'); return false; }
+          if (!Validate.minLength(fields.deskripsi.value, 5)) { Toast.error('Deskripsi minimal 5 karakter'); return false; }
           try {
             await Api.post('createLaporanKerusakan', {
               tipe_item: fields.tipeItem.value,
@@ -158,7 +158,7 @@ const LaporanKerusakan = {
             });
             Toast.success('Laporan berhasil dibuat');
             this._reload();
-          } catch (e) { Toast.error(e.message || 'Gagal membuat laporan'); }
+          } catch (e) { Toast.error(e.message || 'Gagal membuat laporan'); return false; }
         }
       }
     ]);
@@ -185,7 +185,7 @@ const LaporanKerusakan = {
       {
         label: 'Simpan', type: 'primary', closeOnClick: true, onClick: async () => {
           if (fields.status.value === 'diabaikan' && !Validate.required(fields.tindak.value)) {
-            Toast.error('Alasan diabaikan wajib diisi'); return;
+            Toast.error('Alasan diabaikan wajib diisi'); return false;
           }
           try {
             await Api.post('updateTindakLanjut', {
@@ -196,7 +196,7 @@ const LaporanKerusakan = {
             });
             Toast.success('Tindak lanjut diperbarui');
             this._reload();
-          } catch (e) { Toast.error(e.message || 'Gagal memperbarui tindak lanjut'); }
+          } catch (e) { Toast.error(e.message || 'Gagal memperbarui tindak lanjut'); return false; }
         }
       }
     ]);
@@ -220,7 +220,7 @@ const LaporanKerusakan = {
       { label: 'Batal', type: 'secondary', onClick: () => {} },
       {
         label: 'Selesaikan', type: 'primary', closeOnClick: true, onClick: async () => {
-          if (!Validate.required(fields.tindak.value)) { Toast.error('Keterangan penyelesaian wajib diisi'); return; }
+          if (!Validate.required(fields.tindak.value)) { Toast.error('Keterangan penyelesaian wajib diisi'); return false; }
           try {
             await Api.post('selesaikanTindakLanjut', {
               id: lap.id,
@@ -229,7 +229,7 @@ const LaporanKerusakan = {
             });
             Toast.success('Laporan diselesaikan');
             this._reload();
-          } catch (e) { Toast.error(e.message || 'Gagal menyelesaikan laporan'); }
+          } catch (e) { Toast.error(e.message || 'Gagal menyelesaikan laporan'); return false; }
         }
       }
     ]);

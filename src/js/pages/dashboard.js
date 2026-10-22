@@ -190,7 +190,7 @@ const Dashboard = {
             await Api.post('approvePeminjaman', { id: id, catatan: catatanInput.value.trim() });
             Toast.success('Peminjaman disetujui');
             this.render(document.getElementById('main-content'));
-          } catch (e) { Toast.error(e.message || 'Gagal menyetujui peminjaman'); }
+          } catch (e) { Toast.error(e.message || 'Gagal menyetujui peminjaman'); return false; }
         }
       }
     ]);
@@ -212,13 +212,13 @@ const Dashboard = {
         label: 'Tolak', type: 'danger', closeOnClick: true, onClick: async () => {
           if (!Validate.required(catatanInput.value) || !Validate.minLength(catatanInput.value, 5)) {
             Toast.error('Alasan penolakan wajib diisi (min. 5 karakter)');
-            return;
+            return false;
           }
           try {
             await Api.post('rejectPeminjaman', { id: id, catatan: catatanInput.value.trim() });
             Toast.success('Peminjaman ditolak');
             this.render(document.getElementById('main-content'));
-          } catch (e) { Toast.error(e.message || 'Gagal menolak peminjaman'); }
+          } catch (e) { Toast.error(e.message || 'Gagal menolak peminjaman'); return false; }
         }
       }
     ]);

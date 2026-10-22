@@ -58,16 +58,17 @@ const PeminjamanForm = {
   _renderForm(container, user) {
     const form = Dom.createElement('form', { id: 'peminjaman-form', novalidate: true });
 
-    // Tipe peminjaman
+    // Tipe peminjaman — dibungkus fieldset+legend untuk semantik grup radio (WCAG m-2)
     const tipeGroup = Dom.createElement('div', { class: 'form-group' });
-    tipeGroup.appendChild(Dom.createElement('label', { class: 'form-label required', text: 'Tipe Peminjaman' }));
+    const tipeFieldset = Dom.createElement('fieldset', { class: 'radio-fieldset' });
+    tipeFieldset.appendChild(Dom.createElement('legend', { class: 'form-label required', text: 'Tipe Peminjaman' }));
     const radioWrap = Dom.createElement('div', { class: 'radio-group' });
     const labRadio = Dom.createElement('input', { type: 'radio', id: 'tipe-lab', name: 'tipe_peminjaman', value: 'lab' });
     const alatRadio = Dom.createElement('input', { type: 'radio', id: 'tipe-alat', name: 'tipe_peminjaman', value: 'alat' });
     radioWrap.appendChild(Dom.createElement('label', { class: 'radio-option', for: 'tipe-lab' }, [labRadio, Dom.createElement('span', { text: 'Lab' })]));
     radioWrap.appendChild(Dom.createElement('label', { class: 'radio-option', for: 'tipe-alat' }, [alatRadio, Dom.createElement('span', { text: 'Alat' })]));
-    tipeGroup.appendChild(radioWrap);
-    tipeGroup.appendChild(Dom.createElement('span', { class: 'form-error', id: 'tipe-error' }));
+    tipeFieldset.appendChild(radioWrap);
+    tipeGroup.appendChild(tipeFieldset);
     form.appendChild(tipeGroup);
 
     // Container untuk item + jumlah (diisi dinamis)
@@ -161,7 +162,9 @@ const PeminjamanForm = {
     let valid = true;
 
     if (!Validate.required(data.tipe_peminjaman)) {
-      Form.showError(document.getElementById('tipe-error') || Dom.qs('input[name="tipe_peminjaman"]'), 'Pilih tipe peminjaman');
+      // Tampilkan error di bawah fieldset grup radio
+      const radioFieldset = Dom.qs('fieldset.radio-fieldset', e.target);
+      Form.showError(radioFieldset || Dom.qs('input[name="tipe_peminjaman"]'), 'Pilih tipe peminjaman');
       valid = false;
     }
     if (!Validate.required(data.id_item)) { valid = false; Toast.error('Pilih item yang ingin dipinjam'); }

@@ -102,11 +102,11 @@ const User = {
       { label: 'Batal', type: 'secondary', onClick: () => {} },
       {
         label: 'Simpan', type: 'primary', closeOnClick: true, onClick: async () => {
-          if (!Validate.required(fields.nama.value)) { Toast.error('Nama wajib diisi'); return; }
-          if (!Validate.email(fields.email.value)) { Toast.error('Email tidak valid'); return; }
-          if (!Validate.required(fields.nipNim.value)) { Toast.error('NIP/NIM wajib diisi'); return; }
-          if (fields.noWa.value && !Validate.noWa(fields.noWa.value)) { Toast.error('No. WhatsApp tidak valid'); return; }
-          if (!Validate.password(fields.password.value)) { Toast.error('Password min. 8 karakter (huruf & angka)'); return; }
+          if (!Validate.required(fields.nama.value)) { Toast.error('Nama wajib diisi'); return false; }
+          if (!Validate.email(fields.email.value)) { Toast.error('Email tidak valid'); return false; }
+          if (!Validate.required(fields.nipNim.value)) { Toast.error('NIP/NIM wajib diisi'); return false; }
+          if (fields.noWa.value && !Validate.noWa(fields.noWa.value)) { Toast.error('No. WhatsApp tidak valid'); return false; }
+          if (!Validate.password(fields.password.value)) { Toast.error('Password min. 8 karakter (huruf & angka)'); return false; }
           try {
             await Api.post('createUser', {
               nama: fields.nama.value.trim(),
@@ -118,7 +118,7 @@ const User = {
             });
             Toast.success('User berhasil ditambahkan');
             this._reload();
-          } catch (e) { Toast.error(e.message || 'Gagal menambah user'); }
+          } catch (e) { Toast.error(e.message || 'Gagal menambah user'); return false; }
         }
       }
     ]);
@@ -140,7 +140,7 @@ const User = {
       ]);
       fields.noWa = Dom.createElement('input', { type: 'text', class: 'form-input', value: user.no_wa || '' });
       return Dom.createElement('div', {}, [
-        Dom.createElement('div', { class: 'form-group' }, [Dom.createElement('label', { class: 'form-label', text: 'Email' }), Dom.createElement('input', { type: 'email', class: 'form-input', value: user.email || '', disabled: true })]),
+        Dom.createElement('div', { class: 'form-group' }, [Dom.createElement('label', { class: 'form-label', text: 'Email', for: 'user-edit-email' }), Dom.createElement('input', { type: 'email', id: 'user-edit-email', class: 'form-input', value: user.email || '', disabled: true })]),
         Form.fieldGroup('Nama', fields.nama, { required: true }),
         Form.fieldGroup('Role', fields.role, { required: true }),
         Form.fieldGroup('Status', fields.status, { required: true }),
@@ -150,8 +150,8 @@ const User = {
       { label: 'Batal', type: 'secondary', onClick: () => {} },
       {
         label: 'Simpan', type: 'primary', closeOnClick: true, onClick: async () => {
-          if (!Validate.required(fields.nama.value)) { Toast.error('Nama wajib diisi'); return; }
-          if (fields.noWa.value && !Validate.noWa(fields.noWa.value)) { Toast.error('No. WhatsApp tidak valid'); return; }
+          if (!Validate.required(fields.nama.value)) { Toast.error('Nama wajib diisi'); return false; }
+          if (fields.noWa.value && !Validate.noWa(fields.noWa.value)) { Toast.error('No. WhatsApp tidak valid'); return false; }
           try {
             await Api.post('updateUser', {
               id: user.id,
@@ -162,7 +162,7 @@ const User = {
             });
             Toast.success('User berhasil diperbarui');
             this._reload();
-          } catch (e) { Toast.error(e.message || 'Gagal memperbarui user'); }
+          } catch (e) { Toast.error(e.message || 'Gagal memperbarui user'); return false; }
         }
       }
     ]);
@@ -180,11 +180,11 @@ const User = {
       { label: 'Batal', type: 'secondary', onClick: () => {} },
       {
         label: 'Reset', type: 'primary', closeOnClick: true, onClick: async () => {
-          if (!Validate.password(input.value)) { Toast.error('Password min. 8 karakter (huruf & angka)'); return; }
+          if (!Validate.password(input.value)) { Toast.error('Password min. 8 karakter (huruf & angka)'); return false; }
           try {
             await Api.post('resetPassword', { id: user.id, password_baru: input.value });
             Toast.success('Password berhasil direset');
-          } catch (e) { Toast.error(e.message || 'Gagal reset password'); }
+          } catch (e) { Toast.error(e.message || 'Gagal reset password'); return false; }
         }
       }
     ]);

@@ -272,6 +272,19 @@
   cursor: pointer;
 }
 
+/* fieldset dipakai untuk grup radio — hilangkan border bawaan browser */
+.radio-fieldset {
+  border: none;
+  padding: 0;
+  min-width: 0;
+}
+.radio-fieldset legend {
+  float: left; /* membuat legend ikut alur normal (tidak melayang di border) */
+  width: 100%;
+  margin-bottom: var(--spacing-2);
+  padding: 0;
+}
+
 /* ============================================================
    Modal
    ============================================================ */

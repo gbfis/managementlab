@@ -72,7 +72,7 @@ const Pengembalian = {
       { label: 'Batal', type: 'secondary', onClick: () => {} },
       {
         label: 'Konfirmasi', type: 'primary', closeOnClick: true, onClick: async () => {
-          if (!kondisiSelect.value) { Toast.error('Pilih kondisi pengembalian'); return; }
+          if (!kondisiSelect.value) { Toast.error('Pilih kondisi pengembalian'); return false; }
           try {
             await Api.post('returnPeminjaman', {
               id: p.id,
@@ -82,7 +82,7 @@ const Pengembalian = {
             });
             Toast.success('Pengembalian dikonfirmasi');
             this.render(document.getElementById('main-content'));
-          } catch (e) { Toast.error(e.message || 'Gagal mengonfirmasi pengembalian'); }
+          } catch (e) { Toast.error(e.message || 'Gagal mengonfirmasi pengembalian'); return false; }
         }
       }
     ]);

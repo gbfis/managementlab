@@ -88,10 +88,10 @@ const Lab = {
       { label: 'Batal', type: 'secondary', onClick: () => {} },
       {
         label: 'Simpan', type: 'primary', closeOnClick: true, onClick: async () => {
-          if (!Validate.required(fields.nama.value)) { Toast.error('Nama lab wajib diisi'); return; }
-          if (!Validate.required(fields.kode.value)) { Toast.error('Kode lab wajib diisi'); return; }
-          if (!Validate.required(fields.lokasi.value)) { Toast.error('Lokasi wajib diisi'); return; }
-          if (!Validate.positiveInt(fields.kapasitas.value)) { Toast.error('Kapasitas harus angka positif'); return; }
+          if (!Validate.required(fields.nama.value)) { Toast.error('Nama lab wajib diisi'); return false; }
+          if (!Validate.required(fields.kode.value)) { Toast.error('Kode lab wajib diisi'); return false; }
+          if (!Validate.required(fields.lokasi.value)) { Toast.error('Lokasi wajib diisi'); return false; }
+          if (!Validate.positiveInt(fields.kapasitas.value)) { Toast.error('Kapasitas harus angka positif'); return false; }
           const payload = {
             nama_lab: fields.nama.value.trim(),
             kode_lab: fields.kode.value.trim(),
@@ -108,7 +108,7 @@ const Lab = {
               Toast.success('Lab berhasil ditambahkan');
             }
             this._reload();
-          } catch (e) { Toast.error(e.message || 'Gagal menyimpan lab'); }
+          } catch (e) { Toast.error(e.message || 'Gagal menyimpan lab'); return false; }
         }
       }
     ]);
@@ -131,7 +131,7 @@ const Lab = {
             await Api.post('updateLab', { id: lab.id, status: select.value });
             Toast.success('Status lab diubah');
             this._reload();
-          } catch (e) { Toast.error(e.message || 'Gagal mengubah status'); }
+          } catch (e) { Toast.error(e.message || 'Gagal mengubah status'); return false; }
         }
       }
     ]);
