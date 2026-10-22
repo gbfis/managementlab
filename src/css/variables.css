@@ -1,0 +1,40 @@
+/* variables.css — design tokens SMLA (dari docs/06-ui-ux.md) */
+:root {
+  /* Neutral */
+  --color-bg: #f7f8fa;
+  --color-surface: #ffffff;
+  --color-border: #e2e8f0;
+  --color-text: #1a202c;
+  --color-text-muted: #718096;
+
+  /* Primary */
+  --color-primary: #1a365d;
+  --color-primary-hover: #2a4a7f;
+
+  /* Status */
+  --color-success: #2f855a;
+  --color-warning: #d69e2e;
+  --color-danger: #c53030;
+  --color-neutral: #718096;
+
+  /* Spacing (4px grid) */
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-6: 24px;
+  --spacing-8: 32px;
+  --spacing-12: 48px;
+
+  /* Typography */
+  --font-size-sm: 13px;
+  --font-size-base: 14px;
+  --font-size-input: 16px;
+  --font-size-heading: 24px;
+  --font-size-section: 18px;
+  --font-size-badge: 12px;
+
+  /* Radius & shadow */
+  --radius: 4px;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}

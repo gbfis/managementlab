@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SMLA — Sistem Management Peminjaman Lab &amp; Alat</title>
+
+  <!--
+    KONFIGURASI GAS_API_URL (URL Web App Google Apps Script).
+    1. Deploy project GAS (Code.gs) sebagai Web App:
+       - "Execute as": Me
+       - "Who has access": Anyone
+    2. Salin URL Web App (format: https://script.google.com/macros/s/AKfyc.../exec)
+    3. Isi attribute content di meta tag di bawah dengan URL tersebut.
+
+    Untuk produksi di Cloudflare Pages: URL ini juga bisa diinjeksi sebagai
+    environment variable (GAS_API_URL) lewat Cloudflare Pages Functions / build
+    step yang menimpa nilai meta tag ini saat deploy.
+    Untuk development: isi langsung di sini.
+
+    Jika kosong, aplikasi tetap terbuka namun setiap permintaan API akan gagal.
+  -->
+  <meta name="gas-api-url" content="" id="gas-api-url">
+  <meta name="description" content="Sistem Management Peminjaman Lab & Alat">
+
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Router renders pages here -->
+  </div>
+  <!-- Modal container -->
+  <div id="modal-container"></div>
+  <!-- Toast container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <script src="js/utils/format.js"></script>
+  <script src="js/utils/validate.js"></script>
+  <script src="js/utils/dom.js"></script>
+  <script src="js/components/badge.js"></script>
+  <script src="js/components/toast.js"></script>
+  <script src="js/components/modal.js"></script>
+  <script src="js/components/table.js"></script>
+  <script src="js/components/form.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/pages/login.js"></script>
+  <script src="js/pages/dashboard.js"></script>
+  <script src="js/pages/peminjaman.js"></script>
+  <script src="js/pages/peminjamanDetail.js"></script>
+  <script src="js/pages/peminjamanForm.js"></script>
+  <script src="js/pages/lab.js"></script>
+  <script src="js/pages/alat.js"></script>
+  <script src="js/pages/user.js"></script>
+  <script src="js/pages/laporan.js"></script>
+  <script src="js/pages/pengembalian.js"></script>
+  <script src="js/pages/laporanKerusakan.js"></script>
+  <script src="js/pages/auditLog.js"></script>
+  <script src="js/router.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

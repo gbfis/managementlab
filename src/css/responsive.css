@@ -1,0 +1,96 @@
+/* responsive.css — media queries SMLA */
+
+/* ============================================================
+   Mobile (< 640px): sidebar tersembunyi, hamburger menu, single column
+   ============================================================ */
+@media (max-width: 640px) {
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 200ms ease;
+    box-shadow: var(--shadow);
+  }
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .main-content {
+    margin-left: 0;
+  }
+
+  .hamburger {
+    display: inline-block;
+  }
+
+  .content-area {
+    padding: var(--spacing-4);
+  }
+
+  .page-header {
+    align-items: flex-start;
+  }
+
+  .stat-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-3);
+  }
+
+  .filter-bar {
+    align-items: stretch;
+  }
+  .filter-bar .filter-actions {
+    margin-left: 0;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .toast-container {
+    left: var(--spacing-3);
+    right: var(--spacing-3);
+    top: var(--spacing-3);
+    max-width: none;
+  }
+
+  .top-bar {
+    padding: 0 var(--spacing-4);
+  }
+  .top-bar-title {
+    font-size: var(--font-size-base);
+  }
+  .top-bar-user .user-info {
+    display: none;
+  }
+}
+
+/* ============================================================
+   Tablet (641px–1024px): 2 kolom di beberapa section, sidebar tetap
+   ============================================================ */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .content-area {
+    padding: var(--spacing-6) var(--spacing-4);
+  }
+
+  .stat-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ============================================================
+   Desktop (> 1024px): full layout
+   ============================================================ */
+@media (min-width: 1025px) {
+  .stat-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+}
