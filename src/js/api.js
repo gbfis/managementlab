@@ -1,75 +1,45 @@
 /**
- * api.js — klien HTTP ke Google Apps Script Web App.
+ * api.js — klien HTTP ke Cloudflare Pages Function proxy (/api).
  *
- * PENTING — CORS & GAS:
- * GAS Web App tidak support preflight OPTIONS request. Solusinya:
- *   - Semua request (GET maupun POST) dikirim sebagai POST
- *   - Content-Type: text/plain (BUKAN application/json) agar tidak trigger preflight
- *   - Body tetap berisi JSON string yang valid
- *   - Token dikirim di dalam body JSON (bukan header Authorization)
+ * Semua request dikirim ke /api (same-origin) — tidak ada CORS issue.
+ * Pages Function di src/functions/api.js meneruskan ke GAS dari server-side.
  *
- * Dengan cara ini browser tidak melakukan preflight dan CORS error tidak terjadi.
- *
- * GAS_API_URL dibaca dari <meta name="gas-api-url"> di index.html.
+ * Mengapa tidak langsung ke GAS?
+ * GAS Web App selalu redirect POST ke script.googleusercontent.com (beda origin).
+ * Browser memblok redirect ini karena CORS. Proxy server-side menghindari masalah ini.
  */
 const Api = {
-  baseUrl: null,
-
-  init() {
-    if (window.__GAS_API_URL__ && typeof window.__GAS_API_URL__ === 'string') {
-      this.baseUrl = window.__GAS_API_URL__;
-      return;
-    }
-    const meta = document.querySelector('meta[name="gas-api-url"]');
-    this.baseUrl = meta ? meta.getAttribute('content') : '';
-  },
-
-  _ensureUrl() {
-    if (this.baseUrl == null) this.init();
-    if (!this.baseUrl) {
-      throw new Error('URL API belum dikonfigurasi. Isi meta[name="gas-api-url"] di index.html.');
-    }
-    return this.baseUrl;
-  },
+  // Proxy endpoint — relative URL, same-origin dengan Cloudflare Pages
+  _proxyUrl: '/api',
 
   _token() {
     return Auth.getToken();
   },
 
-  /**
-   * GET via POST — kirim action + params sebagai payload POST.
-   * Ini menghindari CORS preflight yang GAS tidak support.
-   */
   async get(action, params) {
     return this._request(action, params || {});
   },
 
-  /**
-   * POST — kirim action + payload.
-   */
   async post(action, payload) {
     return this._request(action, payload || {});
   },
 
-  /**
-   * Core request: selalu POST, Content-Type: text/plain, body JSON string.
-   */
   async _request(action, payload) {
-    const base = this._ensureUrl();
     const token = this._token();
 
-    const body = {
-      action: action,
-      payload: payload
-    };
+    const body = { action, payload };
     if (token) body.token = token;
 
-    const resp = await fetch(base, {
-      method: 'POST',
-      // text/plain tidak trigger CORS preflight — kunci utama agar GAS bisa diakses
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify(body)
-    });
+    let resp;
+    try {
+      resp = await fetch(this._proxyUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+    } catch (networkErr) {
+      throw new Error('Tidak dapat terhubung ke server. Periksa koneksi internet Anda.');
+    }
 
     return this._handle(resp);
   },
@@ -79,7 +49,7 @@ const Api = {
     try {
       data = await resp.json();
     } catch (e) {
-      throw new Error('Respons server tidak valid. Periksa URL API di index.html.');
+      throw new Error('Respons server tidak valid.');
     }
     if (data && data.success === false) {
       const msg = (data.error && data.error.message) ? data.error.message : 'Terjadi kesalahan';
