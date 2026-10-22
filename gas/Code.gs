@@ -40,12 +40,17 @@ function handleRequest(e, method) {
       delete payload.action;
       delete payload.token;
     } else {
-      // POST: body JSON berisi { action, payload }
-      const body = JSON.parse(e.postData.contents);
+      // POST: body berisi JSON string (Content-Type: text/plain untuk bypass CORS preflight)
+      // Semua request (termasuk yang sebelumnya GET) dikirim via POST dari frontend.
+      let body = {};
+      try {
+        body = JSON.parse(e.postData.contents);
+      } catch (parseErr) {
+        throw { code: 'VALIDATION_ERROR', message: 'Request body tidak valid (bukan JSON)' };
+      }
       action = body.action;
       payload = body.payload || {};
-      // Token dari header Authorization: Bearer <token> atau dari body
-      token = _getBearerToken(e) || body.token;
+      token = body.token || null;
     }
 
     if (!action) {
