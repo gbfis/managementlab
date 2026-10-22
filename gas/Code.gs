@@ -67,7 +67,7 @@ function handleRequest(e, method) {
 
     // Action login tidak butuh token
     let currentUser = null;
-    if (action !== 'login' && action !== 'requestPasswordReset' && action !== 'resetPasswordViaToken') {
+    if (action !== 'login' && action !== 'requestPasswordReset' && action !== 'resetPasswordViaToken' && action !== 'registerUser') {
       currentUser = getCurrentUser(token);
       checkRateLimit(currentUser.email);
       checkPermission(action, currentUser.role);
@@ -116,6 +116,9 @@ function _dispatch(action, payload, currentUser, e) {
 
     case 'resetPasswordViaToken':
       return resetPasswordViaToken(payload.reset_token, payload.password_baru);
+
+    case 'registerUser':
+      return registerUser(payload);
 
     // === LAB ===
     case 'getLabs':
@@ -324,6 +327,7 @@ function _getSuccessMessage(action) {
     changePassword:        'Password berhasil diubah',
     requestPasswordReset:  'Permintaan reset password dikirim',
     resetPasswordViaToken: 'Password berhasil diubah',
+    registerUser:          'Pendaftaran berhasil',
     getLabs:               'Data lab berhasil diambil',
     getLab:                'Data lab berhasil diambil',
     createLab:             'Lab berhasil ditambahkan',

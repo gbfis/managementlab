@@ -28,9 +28,22 @@ const Router = {
   },
 
   getCurrentPath() {
-    const hash = window.location.hash.slice(1);
+    const hash = window.location.hash.slice(1); // hapus '#'
     if (!hash) return '/';
-    return hash;
+    // Pisahkan path dari query string — query string ditangani terpisah via getQueryParams()
+    const qIndex = hash.indexOf('?');
+    return qIndex !== -1 ? hash.slice(0, qIndex) : hash;
+  },
+
+  /** Ambil query params dari hash URL, mis. #/reset-password?token=xxx */
+  getQueryParams() {
+    const hash = window.location.hash.slice(1);
+    const qIndex = hash.indexOf('?');
+    if (qIndex === -1) return {};
+    const search = hash.slice(qIndex);
+    const params = {};
+    new URLSearchParams(search).forEach((v, k) => { params[k] = v; });
+    return params;
   },
 
   init() {
@@ -62,15 +75,23 @@ const Router = {
 
     const path = this.getCurrentPath();
 
-    // Halaman login: render di luar layout (full page)
-    if (path === '/login') {
-      if (Auth.isAuthenticated()) {
+    // Halaman public (tidak butuh auth): login, reset-password, register
+    const publicPaths = ['/login', '/reset-password', '/register'];
+    if (publicPaths.indexOf(path) !== -1) {
+      if (Auth.isAuthenticated() && path === '/login') {
         this.navigate('/');
         return;
       }
       const appEl = document.getElementById('app');
       Dom.clearChildren(appEl);
-      Login.render(appEl);
+      if (path === '/login') {
+        Login.render(appEl);
+      } else if (path === '/reset-password') {
+        const qp = this.getQueryParams();
+        ResetPassword.render(appEl, qp);
+      } else if (path === '/register') {
+        Register.render(appEl);
+      }
       return;
     }
 

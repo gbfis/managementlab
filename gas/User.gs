@@ -121,7 +121,7 @@ function updateUser(payload, currentUser) {
     updates.role = fields.role;
   }
   if (fields.status !== undefined) {
-    validateEnum(fields.status, ['aktif', 'nonaktif', 'terkunci'], 'Status');
+    validateEnum(fields.status, ['aktif', 'nonaktif', 'terkunci', 'menunggu_verifikasi'], 'Status');
     updates.status = fields.status;
   }
   if (fields.no_wa !== undefined) {
@@ -291,4 +291,71 @@ function _sanitizeUserData(user) {
   if (!user) return null;
   const { password_hash, salt, ...safe } = user;
   return safe;
+}
+
+/**
+ * Registrasi user baru (self-register).
+ * Status awal: 'pending_approval' — perlu disetujui admin sebelum bisa login.
+ * Action ini bersifat public (tidak butuh session token).
+ * @param {object} payload - { nama, email, nip_nim, role, no_wa, password }
+ * @returns {object}
+ */
+function registerUser(payload) {
+  const { nama, email, nip_nim, role, no_wa, password } = payload;
+
+  validateRequired(nama, 'Nama');
+  validateRequired(email, 'Email');
+  validateRequired(nip_nim, 'NIP/NIM');
+  validateRequired(role, 'Role');
+  validateRequired(password, 'Password');
+  validateLength(nama, 2, 100, 'Nama');
+  validateLength(password, 8, 255, 'Password');
+
+  // Role yang boleh self-register
+  validateEnum(role, ['mahasiswa', 'dosen'], 'Role');
+
+  if (!validateEmail(email)) {
+    throw { code: 'VALIDATION_ERROR', message: 'Format email tidak valid' };
+  }
+
+  if (no_wa && !validateNoWa(no_wa)) {
+    throw { code: 'VALIDATION_ERROR', message: 'Format nomor WhatsApp tidak valid (08xx atau 628xx)' };
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
+  const existing = getAllRows('users');
+  const dupEmail = existing.find(r => r.email && r.email.toLowerCase() === normalizedEmail);
+  if (dupEmail) {
+    throw { code: 'CONFLICT', message: 'Email sudah terdaftar' };
+  }
+
+  const salt = generateSalt();
+  const passwordHash = hashPassword(password, salt);
+  const now = new Date().toISOString();
+
+  const user = {
+    id: generateUUID(),
+    nama: sanitizeForSheet(String(nama).trim()),
+    email: sanitizeForSheet(normalizedEmail),
+    nip_nim: sanitizeForSheet(String(nip_nim).trim()),
+    role: role,
+    no_wa: sanitizeForSheet(String(no_wa || '').trim()),
+    telegram_chat_id: '',
+    password_hash: passwordHash,
+    salt: salt,
+    login_attempt: 0,
+    status: 'menunggu_verifikasi', // Perlu disetujui admin
+    created_at: now
+  };
+
+  appendRow('users', user);
+
+  logAudit(normalizedEmail, 'register', { id: user.id, role: role });
+
+  // Notifikasi ke admin
+  sendEmailRegistrasiBaruKeAdmin(user);
+
+  return {
+    message: 'Pendaftaran berhasil! Akun Anda sedang menunggu verifikasi dari admin. Anda akan dihubungi setelah akun diaktifkan.'
+  };
 }

@@ -61,6 +61,17 @@ const Login = {
     });
     forgotLink.addEventListener('click', () => this._showForgotModal());
     forgotWrap.appendChild(forgotLink);
+
+    // Separator
+    forgotWrap.appendChild(Dom.createElement('span', { text: ' · ', style: 'color:#cbd5e0' }));
+
+    // Link register
+    const registerLink = Dom.createElement('a', {
+      href: '#/register',
+      class: 'btn-link',
+      text: 'Daftar akun baru'
+    });
+    forgotWrap.appendChild(registerLink);
     form.appendChild(forgotWrap);
 
     card.appendChild(form);

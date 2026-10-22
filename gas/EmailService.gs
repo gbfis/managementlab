@@ -349,3 +349,41 @@ function sendEmailResetPassword(user, resetUrl, namaSistem) {
     throw { code: 'SERVER_ERROR', message: 'Gagal mengirim email reset password. Coba lagi nanti.' };
   }
 }
+
+/**
+ * Kirim email notifikasi ke admin saat ada user baru mendaftar.
+ * @param {object} user
+ * @param {string} [namaSistem]
+ */
+function sendEmailRegistrasiBaruKeAdmin(user, namaSistem) {
+  const sys = namaSistem || getConfig('sistem_nama') || 'SMLA';
+  const adminEmail = getConfig('admin_email') || PropertiesService.getScriptProperties().getProperty('ADMIN_EMAIL');
+  if (!adminEmail) return;
+
+  const roleLabel = user.role === 'mahasiswa' ? 'Mahasiswa' : 'Dosen';
+  const konten = `
+    <h2>Pendaftaran Akun Baru</h2>
+    <p>Ada pendaftaran akun baru yang menunggu verifikasi:</p>
+    <table class="info-table">
+      <tr><td>Nama</td><td>${escapeHtml(user.nama)}</td></tr>
+      <tr><td>Email</td><td>${escapeHtml(user.email)}</td></tr>
+      <tr><td>NIP/NIM</td><td>${escapeHtml(user.nip_nim)}</td></tr>
+      <tr><td>Role</td><td>${escapeHtml(roleLabel)}</td></tr>
+      <tr><td>No. WA</td><td>${escapeHtml(user.no_wa || '-')}</td></tr>
+    </table>
+    <div class="callout">
+      Masuk ke dashboard admin dan buka menu <strong>User</strong> untuk menyetujui atau menolak pendaftaran ini.
+    </div>
+  `;
+
+  try {
+    MailApp.sendEmail({
+      to: adminEmail,
+      subject: `[${sys}] Pendaftaran Akun Baru — ${user.nama}`,
+      htmlBody: buildEmailTemplate('Pendaftaran Akun Baru', konten, sys),
+      name: sys
+    });
+  } catch (err) {
+    console.error('sendEmailRegistrasiBaruKeAdmin error:', err);
+  }
+}

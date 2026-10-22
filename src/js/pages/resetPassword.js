@@ -7,12 +7,8 @@ const ResetPassword = {
   render(container, params) {
     Dom.clearChildren(container);
 
-    // Ambil token dari URL hash query string
-    const hash = window.location.hash; // mis: #/reset-password?token=xxx
-    const qIndex = hash.indexOf('?');
-    const token = qIndex !== -1
-      ? new URLSearchParams(hash.slice(qIndex)).get('token')
-      : null;
+    // Token dari params yang sudah di-parse oleh router
+    const token = (params && params.token) ? params.token : null;
 
     const page = Dom.createElement('div', { class: 'login-page' });
     const card = Dom.createElement('div', { class: 'login-card' });

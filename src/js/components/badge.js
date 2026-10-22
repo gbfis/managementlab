@@ -43,7 +43,8 @@ const Badge = {
     // Status user
     aktif: { label: 'Aktif', cls: 'badge-success' },
     nonaktif: { label: 'Nonaktif', cls: 'badge-neutral' },
-    terkunci: { label: 'Terkunci', cls: 'badge-danger' }
+    terkunci: { label: 'Terkunci', cls: 'badge-danger' },
+    menunggu_verifikasi: { label: 'Menunggu Verifikasi', cls: 'badge-pending' }
   },
 
   /** Render <span class="badge ..."> dengan label Indonesia. */

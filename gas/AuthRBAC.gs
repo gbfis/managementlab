@@ -16,6 +16,7 @@ const PERMISSIONS = {
   'changePassword':           ['admin', 'staff', 'dosen', 'mahasiswa'],
   'requestPasswordReset':     [],  // public — tidak butuh token
   'resetPasswordViaToken':    [],  // public — tidak butuh token
+  'registerUser':             [],  // public — self-register
 
   // Lab
   'getLabs':            ['admin', 'staff', 'dosen', 'mahasiswa'],

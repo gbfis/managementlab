@@ -35,6 +35,10 @@ function login(email, password, e) {
     logAudit(email, 'login_failed', { reason: 'terkunci' }, ip);
     throw { code: 'UNAUTHORIZED', message: 'Akun terkunci. Hubungi admin untuk membuka kunci' };
   }
+  if (user.status === 'menunggu_verifikasi') {
+    logAudit(email, 'login_failed', { reason: 'menunggu_verifikasi' }, ip);
+    throw { code: 'UNAUTHORIZED', message: 'Akun Anda masih menunggu verifikasi admin. Harap tunggu konfirmasi.' };
+  }
 
   // Verifikasi password
   const isValid = verifyPassword(password, user.salt, user.password_hash);
