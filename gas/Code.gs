@@ -10,6 +10,14 @@
  * @returns {GoogleAppsScript.Content.TextOutput}
  */
 function doGet(e) {
+  // Debug endpoint: GET ?action=ping untuk verifikasi GAS aktif
+  if (e && e.parameter && e.parameter.action === 'ping') {
+    return ContentService.createTextOutput(JSON.stringify({
+      success: true,
+      message: 'GAS aktif',
+      timestamp: new Date().toISOString()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
   return handleRequest(e, 'GET');
 }
 
