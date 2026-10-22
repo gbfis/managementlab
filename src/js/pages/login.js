@@ -1,5 +1,5 @@
 /**
- * login.js — halaman login (full page, di luar layout sidebar).
+ * login.js — halaman login dan lupa password (full page, di luar layout sidebar).
  */
 const Login = {
   render(container) {
@@ -52,6 +52,17 @@ const Login = {
     });
     form.appendChild(Dom.createElement('div', { class: 'form-group' }, submitBtn));
 
+    // Link lupa password
+    const forgotWrap = Dom.createElement('div', { class: 'login-forgot' });
+    const forgotLink = Dom.createElement('button', {
+      type: 'button',
+      class: 'btn-link',
+      text: 'Lupa password?'
+    });
+    forgotLink.addEventListener('click', () => this._showForgotModal());
+    forgotWrap.appendChild(forgotLink);
+    form.appendChild(forgotWrap);
+
     card.appendChild(form);
     page.appendChild(card);
     container.appendChild(page);
@@ -100,5 +111,51 @@ const Login = {
       Form.setLoading(submitBtn, false, 'Masuk');
       this._showError(errorBox, err && err.message ? err.message : 'Login gagal. Periksa email dan password Anda.');
     }
+  },
+
+  /** Tampilkan modal lupa password */
+  _showForgotModal() {
+    const emailInput = Dom.createElement('input', {
+      type: 'email',
+      class: 'form-input',
+      placeholder: 'email@kampus.ac.id',
+      autocomplete: 'email'
+    });
+
+    Modal.open(
+      'Lupa Password',
+      () => {
+        const wrap = Dom.createElement('div');
+        wrap.appendChild(Dom.createElement('p', {
+          text: 'Masukkan email akun Anda. Kami akan mengirim link untuk membuat password baru.',
+          style: 'margin-bottom:12px;color:#4a5568;font-size:14px'
+        }));
+        wrap.appendChild(Form.fieldGroup('Email', emailInput, { required: true }));
+        return wrap;
+      },
+      [
+        {
+          label: 'Kirim Link Reset',
+          type: 'primary',
+          onClick: async () => {
+            Form.clearErrors(emailInput.closest('.form-group') || emailInput);
+            const email = (emailInput.value || '').trim().toLowerCase();
+            if (!Validate.email(email)) {
+              Form.showError(emailInput, 'Masukkan email yang valid');
+              return false; // Jaga modal tetap terbuka
+            }
+            try {
+              await Api.post('requestPasswordReset', { email });
+              Toast.success('Link reset password telah dikirim. Periksa inbox email Anda.');
+            } catch (err) {
+              Toast.error(err.message || 'Gagal mengirim email. Coba lagi nanti.');
+              return false; // Jaga modal tetap terbuka jika error
+            }
+          }
+        },
+        { label: 'Batal', type: 'secondary' }
+      ]
+    );
+    setTimeout(() => emailInput.focus(), 100);
   }
 };

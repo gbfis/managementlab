@@ -220,3 +220,32 @@
 .login-error {
   margin-bottom: var(--spacing-4);
 }
+
+/* Link lupa password */
+.login-forgot {
+  text-align: center;
+  margin-top: var(--spacing-3);
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  padding: 0;
+  text-decoration: underline;
+}
+.btn-link:hover {
+  color: var(--color-primary-hover);
+}
+
+/* Alert success (dipakai di halaman reset password) */
+.alert-success {
+  background: #f0fff4;
+  color: #22543d;
+  border: 1px solid #9ae6b4;
+  border-radius: var(--radius);
+  padding: var(--spacing-3) var(--spacing-4);
+  font-size: var(--font-size-body);
+}

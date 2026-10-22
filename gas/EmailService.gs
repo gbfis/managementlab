@@ -306,3 +306,46 @@ function sendEmailOverdue(peminjaman, hariTerlambat, namaSistem) {
     console.error('sendEmailOverdue error:', err);
   }
 }
+
+/**
+ * Kirim email link reset password.
+ * @param {object} user - data user (id, nama, email)
+ * @param {string} resetUrl - URL lengkap berisi token
+ * @param {string} [namaSistem]
+ */
+function sendEmailResetPassword(user, resetUrl, namaSistem) {
+  const sys = namaSistem || getConfig('sistem_nama') || 'SMLA';
+  const konten = `
+    <h2>Reset Password</h2>
+    <p>Halo <strong>${escapeHtml(user.nama)}</strong>,</p>
+    <p>Kami menerima permintaan reset password untuk akun Anda di ${escapeHtml(sys)}.</p>
+    <p>Klik tombol di bawah untuk membuat password baru:</p>
+    <p style="text-align:center;margin:28px 0;">
+      <a href="${resetUrl}"
+         style="background:#1a365d;color:#fff;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:700;font-size:15px;display:inline-block;">
+        Reset Password
+      </a>
+    </p>
+    <p style="font-size:13px;color:#718096;">
+      Atau salin link berikut ke browser Anda:<br>
+      <a href="${resetUrl}" style="color:#1a365d;word-break:break-all;">${resetUrl}</a>
+    </p>
+    <div class="callout callout-warning">
+      Link ini hanya berlaku selama <strong>1 jam</strong> dan hanya bisa digunakan sekali.
+      Jika Anda tidak meminta reset password, abaikan email ini — akun Anda tetap aman.
+    </div>
+  `;
+
+  try {
+    MailApp.sendEmail({
+      to: user.email,
+      subject: `[${sys}] Reset Password Akun Anda`,
+      htmlBody: buildEmailTemplate('Reset Password', konten, sys),
+      name: sys
+    });
+  } catch (err) {
+    console.error('sendEmailResetPassword error:', err);
+    // Lempar error agar caller tahu email gagal dikirim
+    throw { code: 'SERVER_ERROR', message: 'Gagal mengirim email reset password. Coba lagi nanti.' };
+  }
+}

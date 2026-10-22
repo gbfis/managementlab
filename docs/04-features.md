@@ -180,6 +180,7 @@ Berjalan otomatis setiap hari jam 16:00 WIB:
 
 > Catat ide fitur yang belum diimplementasi di sini.
 
+- [x] **Lupa Password** — request via email, link reset 1 jam, halaman buat password baru (`/#/reset-password?token=...`)
 - [ ] QR Code per lab/alat untuk scan saat ambil dan kembali
 - [ ] Kalender ketersediaan lab (lihat jadwal yang sudah dibooking)
 - [ ] Export laporan ke PDF/Excel

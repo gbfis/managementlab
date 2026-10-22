@@ -177,3 +177,122 @@ function _invalidateUserTokens(userId) {
     }
   }
 }
+
+// ─────────────────────────────────────────────
+// FITUR LUPA PASSWORD
+// ─────────────────────────────────────────────
+
+/** TTL reset token: 1 jam */
+const RESET_TOKEN_TTL_SECONDS = 3600;
+
+/**
+ * Request reset password: generate token → kirim email berisi link reset.
+ * Action ini bersifat public (tidak butuh session token).
+ * @param {string} email
+ * @returns {object}
+ */
+function requestPasswordReset(email) {
+  if (!email || !validateEmail(email)) {
+    throw { code: 'VALIDATION_ERROR', message: 'Format email tidak valid' };
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
+
+  // Cari user — jika tidak ada, tetap return sukses (tidak bocorkan info eksistensi akun)
+  const result = findRow('users', getHeaders('users').indexOf('email'), normalizedEmail);
+  if (!result || result.data.status === 'nonaktif') {
+    // Diam-diam sukses agar tidak bisa enumerate email
+    return { message: 'Jika email terdaftar, link reset password telah dikirim.' };
+  }
+
+  const user = result.data;
+
+  // Generate reset token unik
+  const resetToken = generateUUID() + '-' + generateUUID();
+  const expiry = Date.now() + (RESET_TOKEN_TTL_SECONDS * 1000);
+
+  // Simpan di PropertiesService: key = 'rst_<token>', value = 'userId|expiry'
+  PropertiesService.getScriptProperties().setProperty(
+    'rst_' + resetToken,
+    user.id + '|' + expiry
+  );
+
+  // Ambil URL aplikasi dari config atau PropertiesService
+  const appUrl = PropertiesService.getScriptProperties().getProperty('APP_URL')
+    || 'https://managementlab.pages.dev';
+
+  const resetUrl = appUrl + '/#/reset-password?token=' + encodeURIComponent(resetToken);
+
+  // Kirim email
+  sendEmailResetPassword(user, resetUrl);
+
+  logAudit(normalizedEmail, 'request_password_reset', { user_id: user.id });
+
+  return { message: 'Jika email terdaftar, link reset password telah dikirim.' };
+}
+
+/**
+ * Validasi reset token dan update password.
+ * Action ini bersifat public (tidak butuh session token).
+ * @param {string} resetToken
+ * @param {string} passwordBaru
+ * @returns {object}
+ */
+function resetPasswordViaToken(resetToken, passwordBaru) {
+  if (!resetToken) {
+    throw { code: 'VALIDATION_ERROR', message: 'Token reset tidak ditemukan' };
+  }
+  validateRequired(passwordBaru, 'Password baru');
+  validateLength(passwordBaru, 8, 255, 'Password baru');
+
+  const key = 'rst_' + resetToken;
+  const stored = PropertiesService.getScriptProperties().getProperty(key);
+
+  if (!stored) {
+    throw { code: 'UNAUTHORIZED', message: 'Link reset password tidak valid atau sudah kadaluarsa' };
+  }
+
+  const parts = stored.split('|');
+  if (parts.length !== 2) {
+    PropertiesService.getScriptProperties().deleteProperty(key);
+    throw { code: 'UNAUTHORIZED', message: 'Token tidak valid' };
+  }
+
+  const userId = parts[0];
+  const expiry = parseInt(parts[1], 10);
+
+  if (Date.now() > expiry) {
+    PropertiesService.getScriptProperties().deleteProperty(key);
+    throw { code: 'UNAUTHORIZED', message: 'Link reset password sudah kadaluarsa. Silakan minta ulang.' };
+  }
+
+  // Cari user
+  const result = findRowById('users', userId);
+  if (!result) {
+    PropertiesService.getScriptProperties().deleteProperty(key);
+    throw { code: 'NOT_FOUND', message: 'User tidak ditemukan' };
+  }
+
+  // Update password
+  const salt = generateSalt();
+  const hash = hashPassword(passwordBaru, salt);
+  const now  = new Date().toISOString();
+
+  updateRow('users', result.rowIndex, {
+    salt: salt,
+    password_hash: hash,
+    login_attempt: 0,
+    status: 'aktif',          // Otomatis buka kunci jika terkunci
+    updated_at: now
+  });
+
+  // Hapus reset token agar tidak bisa dipakai dua kali
+  PropertiesService.getScriptProperties().deleteProperty(key);
+
+  // Invalidasi semua session token lama
+  _invalidateUserTokens(userId);
+
+  logAudit(result.data.email, 'reset_password_via_token', { user_id: userId });
+
+  return { message: 'Password berhasil diubah. Silakan login dengan password baru Anda.' };
+}

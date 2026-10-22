@@ -9,11 +9,13 @@
  */
 const PERMISSIONS = {
   // Auth
-  'login':              [],  // public — tidak butuh token
-  'logout':             ['admin', 'staff', 'dosen', 'mahasiswa'],
-  'me':                 ['admin', 'staff', 'dosen', 'mahasiswa'],
-  'updateProfile':      ['admin', 'staff', 'dosen', 'mahasiswa'],
-  'changePassword':     ['admin', 'staff', 'dosen', 'mahasiswa'],
+  'login':                    [],  // public
+  'logout':                   ['admin', 'staff', 'dosen', 'mahasiswa'],
+  'me':                       ['admin', 'staff', 'dosen', 'mahasiswa'],
+  'updateProfile':            ['admin', 'staff', 'dosen', 'mahasiswa'],
+  'changePassword':           ['admin', 'staff', 'dosen', 'mahasiswa'],
+  'requestPasswordReset':     [],  // public — tidak butuh token
+  'resetPasswordViaToken':    [],  // public — tidak butuh token
 
   // Lab
   'getLabs':            ['admin', 'staff', 'dosen', 'mahasiswa'],

@@ -137,7 +137,8 @@ function setupSecrets() {
   props.setProperties({
     'SESSION_SECRET':      'GANTI-DENGAN-STRING-RANDOM-64-KARAKTER',
     'TELEGRAM_BOT_TOKEN':  'GANTI-DENGAN-TOKEN-BOT-TELEGRAM',
-    'TELEGRAM_CHANNEL_ID': 'GANTI-DENGAN-CHANNEL-ID-TELEGRAM'
+    'TELEGRAM_CHANNEL_ID': 'GANTI-DENGAN-CHANNEL-ID-TELEGRAM',
+    'APP_URL':             'https://managementlab.pages.dev'
   });
   Logger.log('Script properties tersimpan. Hapus nilai sensitif dari kode setelah dijalankan.');
 }

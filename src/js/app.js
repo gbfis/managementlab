@@ -27,6 +27,7 @@ const App = {
   registerRoutes() {
     Router.register('/', (c) => Dashboard.render(c), null);
     Router.register('/login', (c) => Login.render(c), null);
+    Router.register('/reset-password', (c, p) => ResetPassword.render(c, p), null);
     Router.register('/peminjaman', (c) => Peminjaman.render(c), null);
     Router.register('/peminjaman/baru', (c) => PeminjamanForm.render(c), ['mahasiswa', 'dosen']);
     Router.register('/peminjaman/:id', (c, p) => PeminjamanDetail.render(c, p), null);
