@@ -12,6 +12,9 @@ const Api = {
   // Proxy endpoint — relative URL, same-origin dengan Cloudflare Pages
   _proxyUrl: '/api',
 
+  /** Backward-compatible init — tidak perlu melakukan apa-apa lagi karena URL sudah tetap /api */
+  init() {},
+
   _token() {
     return Auth.getToken();
   },
