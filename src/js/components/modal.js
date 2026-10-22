@@ -123,8 +123,11 @@ const Modal = {
     };
     document.addEventListener('keydown', this._keyHandler);
 
-    // Fokus ke elemen pertama yang bisa difokus
+    // Fokus ke elemen pertama yang bisa difokus, scroll modal body ke atas
     setTimeout(() => {
+      // Scroll body modal ke atas agar field pertama selalu terlihat
+      const modalBody = modal.querySelector('.modal-body');
+      if (modalBody) modalBody.scrollTop = 0;
       const focusable = modal.querySelector('input, select, textarea, button:not(.modal-close)');
       if (focusable) focusable.focus();
       else closeBtn.focus();
